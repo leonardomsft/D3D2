@@ -1,13 +1,5 @@
-// d3d2.cpp : Defines the entry point for the application.
-
-
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #include <windows.h>
-// C RunTime Header Files
-//#include <stdlib.h>
-//#include <malloc.h>
-//#include <memory.h>
-//#include <tchar.h>
 #include "resource.h"
 #include <d3d9.h>
 
@@ -18,10 +10,9 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
-LPDIRECT3D9 d3d;    // the pointer to our Direct3D interface
-LPDIRECT3DDEVICE9 d3ddev;    // the pointer to the device class
+LPDIRECT3D9 d3d;                                 // the pointer to our Direct3D interface
+LPDIRECT3DDEVICE9 d3ddev;                       // the pointer to the device class
 LPDIRECT3DVERTEXBUFFER9 v_buffer1 = NULL;    // the pointer to the vertex buffer
-LPDIRECT3DVERTEXBUFFER9 v_buffer2 = NULL;    // the pointer to the vertex buffer
 
 
 // Forward declarations of functions included in this code module:
@@ -33,7 +24,6 @@ HRESULT initD3D(HWND hWnd);    // sets up and initializes Direct3D
 void render_frame(void);    // renders a single frame
 void cleanD3D(void);    // closes Direct3D and releases memory
 void init_graphics(void);    // 3D declarations
-BOOL isone = true;
 
 struct CUSTOMVERTEX { FLOAT X, Y, Z, RHW; DWORD COLOR; };
 #define CUSTOMFVF (D3DFVF_XYZRHW | D3DFVF_DIFFUSE)
@@ -82,19 +72,8 @@ void render_frame(void)
     d3ddev->SetFVF(CUSTOMFVF);
 
     
-    if (isone) 
-    {
-        d3ddev->SetStreamSource(0, v_buffer1, 0, sizeof(CUSTOMVERTEX));
+    d3ddev->SetStreamSource(0, v_buffer1, 0, sizeof(CUSTOMVERTEX));
 
-        isone = false;
-    }
-    else
-    {
-        d3ddev->SetStreamSource(0, v_buffer2, 0, sizeof(CUSTOMVERTEX));
-
-        isone = true;
-    }
-    // select the vertex buffer to display
 
     // copy the vertex buffer to the back buffer
     d3ddev->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 1);
@@ -111,7 +90,6 @@ void render_frame(void)
 void cleanD3D(void)
 {
     v_buffer1->Release();    // close and release the vertex buffer
-    v_buffer2->Release();    // close and release the vertex buffer
     d3ddev->Release();    // close and release the 3D device
     d3d->Release();    // close and release Direct3D
 }
@@ -128,53 +106,31 @@ void init_graphics(void)
         { 0.0f, 800.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(255, 0, 0), },
     };
 
-    CUSTOMVERTEX vertices2[] =
-    {
-        { 800.0f, 0.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 0, 255), },
-        { 1600.0f, 800.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(0, 255, 0), },
-        { 800.0f, 800.0f, 0.5f, 1.0f, D3DCOLOR_XRGB(255, 0, 0), },
-    };
-
-
     VOID* pVoid;    // a void pointer
 
 
-    // create a vertex buffer interface called v_buffer1
-    d3ddev->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX) * 2,
-        0,
-        CUSTOMFVF,
-        D3DPOOL_MANAGED,
-        &v_buffer1,
-        NULL);
+    for (int i = 0; i < 100000; i++)
+    {
+        // create a vertex buffer interface called v_buffer1
+        d3ddev->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX) * 2,
+            0,
+            CUSTOMFVF,
+            D3DPOOL_MANAGED,
+            &v_buffer1,
+            NULL);
 
-    // lock v_buffer and load the vertices into it
-    v_buffer1->Lock(0, 0, (void**)&pVoid, 0);
-    memcpy(pVoid, vertices1, sizeof(vertices1));
-    v_buffer1->Unlock();
+        // lock v_buffer and load the vertices into it
+        v_buffer1->Lock(0, 0, (void**)&pVoid, 0);
+        memcpy(pVoid, vertices1, sizeof(vertices1));
+        v_buffer1->Unlock();
 
+    }
 
-    // create a vertex buffer interface called v_buffer2
-    d3ddev->CreateVertexBuffer(3 * sizeof(CUSTOMVERTEX) * 2,
-        0,
-        CUSTOMFVF,
-        D3DPOOL_DEFAULT,
-        &v_buffer2,
-        NULL);
-
-    // lock v_buffer2 and load the vertices into it
-    v_buffer2->Lock(0, 0, (void**)&pVoid, 0);
-    memcpy(pVoid, vertices2, sizeof(vertices2));
-    v_buffer2->Unlock();
 
 
 }
 
 
-//
-//  FUNCTION: MyRegisterClass()
-//
-//  PURPOSE: Registers the window class.
-//
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEXW wcex;
@@ -197,16 +153,6 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 }
 
 
-//
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE: Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
-//
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
